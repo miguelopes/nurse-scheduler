@@ -30,11 +30,23 @@ class NameForm extends Component {
                 },
                 body: JSON.stringify(this.state)
             });
-        const text = await response.json();
+        const responseBody = await response.json();
+
+        console.log("response:", responseBody);
+	if (!responseBody) {
+		return;
+        }
+
+        const parsedResponse = JSON.parse(responseBody);
+        console.log("parsedResponse:", parsedResponse);
+	if (!!parsedResponse.error) {
+		alert("Não foi possível encontrar um horário compatível. Experimente aumentar o número de enfermeiros");
+		return;
+	}
+
         this.setState({
-            resposta: text
+            resposta: parsedResponse
         });
-        console.log("Finalizing fetch, text = " + text);
     }
 
     normalsChange(e) {
@@ -62,27 +74,17 @@ class NameForm extends Component {
     }
 
     createCalendar() {
+        var respostaParts = this.state.resposta;
+	if (!respostaParts) {
+	    return;
+	}
+
+        /* traduzir numeros para letras */
         let table = [];
-        let respostaParts = [];
-        var resposta = this.state.resposta;
         let respostaTransformadaChefes = [];
         let respostaTransformadaNormais = [];
         let respostaTransformadaManhas = [];
         let respostaTransformadaManhasSemFds = [];
-        console.log("logar a resposta:");
-        console.log(resposta);
-	if (!resposta) {
-		return;
-        }
-        respostaParts = JSON.parse(resposta);
-        console.log("Reposta parse:");
-        console.log(respostaParts);
-	if (!!respostaParts.error) {
-		alert("Não foi possível encontrar um horário compatível. Exprimente aumentar o número de enfermeiros");
-		return;
-	}
-
-        /* traduzir numeros para letras */
         for (var i = 0; i < respostaParts.chiefs.length; i++) {
             let respostaAux = [];
             for (var j = 0; j < 8; j++) {
